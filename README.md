@@ -150,10 +150,6 @@ public class MovieService {
         String videoKey = "movies/" + file.getOriginalFilename();
         String thumbnailKey = "thumbnail/" + thumbnail.getOriginalFilename();
 
-        // S3에 비디오 및 썸네일 파일 업로드
-        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, videoKey, file.getInputStream(), new ObjectMetadata()));
-        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, thumbnailKey, thumbnail.getInputStream(), new ObjectMetadata()));
-
         // 비디오 파일의 메타데이터 설정 
         ObjectMetadata videoMetadata = new ObjectMetadata();
         videoMetadata.setContentType("video/mp4"); // 비디오 파일의 MIME 타입 설정
@@ -161,6 +157,10 @@ public class MovieService {
         // 썸네일 파일의 메타데이터 설정
         ObjectMetadata thumbnailMetadata = new ObjectMetadata();
         thumbnailMetadata.setContentType("image/jpeg"); // 썸네일 이미지의 MIME 타입 설정
+
+        // S3에 비디오 및 썸네일 파일 업로드 (메타데이터 포함)
+        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, videoKey, file.getInputStream(), videoMetadata));
+        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, thumbnailKey, thumbnail.getInputStream(), thumbnailMetadata));
 
         // URL 생성
         String videoUrl = amazonS3.getUrl(awsS3BucketName, videoKey).toString();
@@ -181,6 +181,7 @@ public class MovieService {
     public List<Movie> findMoviesByGenre(String genre) {
         return movieRepository.findByGenre(genre);
     }
+}
 }
 ```
  - **슬라이더 컴포넌트, 썸네일 컴포넌트**
